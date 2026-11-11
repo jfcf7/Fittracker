@@ -2,168 +2,288 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FitTracker Pro</title>
     
-    <!-- PWA Meta Tags -->
+    <!-- Configurazione PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#111827">
     <link rel="apple-touch-icon" href="icon-192.png">
     
-    <!-- Librerie esterne: Tailwind (Stile) e Chart.js (Grafici) -->
+    <!-- Librerie: Tailwind (Design), Chart.js (Grafici), FontAwesome (Icone) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Registrazione Service Worker per l'uso offline in palestra -->
+    <!-- Registrazione Offline -->
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('ServiceWorker registrato con successo'))
-                    .catch(err => console.log('Registrazione ServiceWorker fallita:', err));
-            });
+            navigator.serviceWorker.register('./sw.js');
         }
     </script>
+    
     <style>
         body { background-color: #111827; color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="pb-20 font-sans">
+<body class="pb-24 font-sans">
     
     <!-- Intestazione -->
-    <header class="bg-blue-600 p-4 shadow-lg sticky top-0 z-50 flex justify-between items-center">
-        <h1 class="text-xl font-bold text-white tracking-wide">FitTracker Pro</h1>
-        <div class="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center text-sm font-bold">TU</div>
+    <header class="bg-gray-900 border-b border-gray-800 p-4 sticky top-0 z-50 flex justify-between items-center">
+        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">FitTracker Pro</h1>
+        <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm shadow-lg border border-blue-400">TU</div>
     </header>
 
-    <main class="p-4 space-y-6 max-w-lg mx-auto">
+    <!-- CONTENUTO PRINCIPALE -->
+    <main class="max-w-md mx-auto p-4">
         
-        <!-- Modulo di Sincronizzazione Smart Merge -->
-        <section class="bg-gray-800 rounded-2xl p-4 shadow-md border border-gray-700">
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="text-lg font-semibold text-gray-200">Sincronizzazione</h2>
-                <button onclick="syncStrava()" class="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
-                    Sincronizza Strava
-                </button>
-            </div>
-            <div id="syncResult" class="hidden bg-gray-900 p-3 rounded-xl border border-gray-700 text-sm text-gray-300"></div>
-        </section>
-
-        <h2 class="text-xl font-bold mt-6 mb-2 text-white">Timeline di Oggi</h2>
-        
-        <!-- Blocco Mattina: Risveglio -->
-        <section class="bg-gray-800 rounded-2xl p-4 shadow-md border-l-4 border-yellow-500">
-            <div class="flex justify-between text-xs text-gray-400 mb-2 font-medium tracking-wide uppercase">
-                <span>07:00 - 07:15</span>
-                <span>Risveglio Muscolare</span>
-            </div>
-            <h3 class="text-lg font-bold text-gray-100">Circuito Mobilità</h3>
-            <p class="text-sm text-gray-400 mt-1">Stretching dinamico e attivazione a corpo libero.</p>
-            <button class="mt-3 w-full bg-yellow-500/10 text-yellow-500 py-2.5 rounded-xl border border-yellow-500/30 font-medium">
-                Segna come Completato
-            </button>
-        </section>
-
-        <!-- Blocco Pomeriggio: Pesi -->
-        <section class="bg-gray-800 rounded-2xl p-4 shadow-md border-l-4 border-blue-500 relative">
-            <div class="flex justify-between text-xs text-gray-400 mb-2 font-medium tracking-wide uppercase">
-                <span>15:30 - 17:00</span>
-                <span>Forza (Programma)</span>
-            </div>
-            <h3 class="text-lg font-bold text-gray-100">Scheda Palestra Principale</h3>
+        <!-- SEZIONE 1: DASHBOARD E TIMELINE -->
+        <div id="tab-timeline" class="tab-pane active space-y-6">
             
-            <!-- Statistiche iniettate dall'orologio post-sincronizzazione -->
-            <div id="gymStats" class="hidden mt-3 bg-blue-900/20 p-3 rounded-xl border border-blue-500/30 text-sm">
-                <span class="text-blue-400 font-semibold">Dati Xiaomi/Strava fusi:</span> 
-                <span class="text-gray-300 block mt-1">Frequenza: 142 BPM medi • Consumo: 450 Kcal</span>
+            <!-- Gemini AI Coach -->
+            <div class="bg-gradient-to-br from-indigo-900 to-gray-800 p-4 rounded-2xl border border-indigo-500/30 shadow-lg">
+                <div class="flex items-center gap-3 mb-2">
+                    <i class="fa-solid fa-robot text-indigo-400 text-xl"></i>
+                    <h2 class="font-bold text-white">FitCoach AI</h2>
+                </div>
+                <p class="text-sm text-indigo-100 leading-relaxed">
+                    Buongiorno! Oggi il tuo "Programma per allenamenti" prevede una sessione pesante. Sincronizza Strava appena hai finito se registri il battito cardiaco con lo Xiaomi.
+                </p>
             </div>
+
+            <!-- Pulsante Smart Merge Strava -->
+            <div class="bg-gray-800 p-4 rounded-2xl border border-gray-700 shadow-md">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-semibold text-gray-200">Dispositivi</h3>
+                    <button onclick="simulateSync()" id="syncBtn" class="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                        <i class="fa-brands fa-strava"></i> Sincronizza
+                    </button>
+                </div>
+                <div id="syncLog" class="hidden mt-3 text-sm text-gray-400 bg-gray-900 p-3 rounded-lg"></div>
+            </div>
+
+            <!-- Timeline Giornaliera -->
+            <h2 class="text-lg font-bold text-white mt-6 mb-3">Timeline di Oggi</h2>
             
-            <div class="mt-4 space-y-3">
-                <div class="bg-gray-900 p-3 rounded-xl border border-gray-700">
-                    <div class="flex justify-between font-semibold text-gray-200">
-                        <span>Panca Piana</span>
-                        <span class="text-blue-400">4 x 8</span>
+            <div class="relative border-l-2 border-gray-700 ml-3 pl-5 space-y-6">
+                <!-- Mattina -->
+                <div class="relative">
+                    <div class="absolute -left-6 top-1 w-3 h-3 bg-yellow-500 rounded-full ring-4 ring-gray-900"></div>
+                    <span class="text-xs font-bold text-yellow-500 mb-1 block">07:00</span>
+                    <div class="bg-gray-800 p-3 rounded-xl border border-gray-700">
+                        <h4 class="font-bold text-gray-100">Risveglio Muscolare</h4>
+                        <p class="text-xs text-gray-400 mt-1">Mobilità e stretching.</p>
+                        <button class="mt-2 text-xs font-semibold text-yellow-500 bg-yellow-500/10 px-3 py-1.5 rounded-lg w-full">Completato ✓</button>
                     </div>
-                    <div class="flex items-center gap-2 mt-3">
-                        <input type="number" placeholder="Kg" class="w-20 bg-gray-800 text-white rounded-lg p-2 text-center border border-gray-600 focus:border-blue-500 focus:outline-none" value="70">
-                        <button class="bg-blue-600 px-3 py-2 rounded-lg text-sm font-medium flex-1 text-center">+2.5 Kg</button>
-                        <button class="bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium flex-1 text-center">✓ Fatto</button>
+                </div>
+
+                <!-- Pomeriggio (Pesi) -->
+                <div class="relative">
+                    <div class="absolute -left-6 top-1 w-3 h-3 bg-blue-500 rounded-full ring-4 ring-gray-900"></div>
+                    <span class="text-xs font-bold text-blue-500 mb-1 block">15:30</span>
+                    <div class="bg-gray-800 p-3 rounded-xl border border-blue-500/30">
+                        <h4 class="font-bold text-gray-100">Forza - Scheda Palestra</h4>
+                        <div id="timelineGymStats" class="hidden mt-2 mb-2 bg-blue-900/30 p-2 rounded-lg text-xs text-blue-300 border border-blue-500/20"></div>
+                        <button onclick="switchTab('tab-workout')" class="mt-2 text-xs font-semibold text-white bg-blue-600 px-3 py-1.5 rounded-lg w-full">Apri Allenamento</button>
+                    </div>
+                </div>
+
+                <!-- Sera (Cardio) -->
+                <div class="relative">
+                    <div class="absolute -left-6 top-1 w-3 h-3 bg-green-500 rounded-full ring-4 ring-gray-900"></div>
+                    <span class="text-xs font-bold text-green-500 mb-1 block">18:00</span>
+                    <div class="bg-gray-800 p-3 rounded-xl border border-gray-700">
+                        <h4 class="font-bold text-gray-100">Sport / Cardio</h4>
+                        <div id="timelineCardioStats" class="hidden mt-2 bg-green-900/30 p-2 rounded-lg text-xs text-green-300 border border-green-500/20"></div>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Blocco Sera: Sport Vari -->
-        <section class="bg-gray-800 rounded-2xl p-4 shadow-md border-l-4 border-green-500">
-            <div class="flex justify-between text-xs text-gray-400 mb-2 font-medium tracking-wide uppercase">
-                <span>18:00 - 19:30</span>
-                <span>Cardio / Sport</span>
+            <!-- Grafico -->
+            <div class="bg-gray-800 p-4 rounded-2xl border border-gray-700 mt-6">
+                <h3 class="font-semibold text-gray-200 mb-4">Volume Settimanale</h3>
+                <canvas id="chartCanvas" height="200"></canvas>
             </div>
-            <h3 class="text-lg font-bold text-gray-100">Partita di Calcio</h3>
-            
-            <!-- Statistiche iniettate da Strava post-sincronizzazione -->
-            <div id="sportStats" class="hidden mt-3 bg-green-900/20 p-3 rounded-xl border border-green-500/30 text-sm">
-                <span class="text-green-400 font-semibold">Dati Strava (Smart Merge):</span> 
-                <span class="text-gray-300 block mt-1">165 BPM medi • 182 Max • 720 Kcal</span>
-            </div>
-        </section>
+        </div>
 
-        <!-- Sezione Analisi e Coach IA -->
-        <section class="bg-gray-800 rounded-2xl p-4 shadow-md border border-gray-700">
-            <h3 class="text-lg font-bold mb-4 text-white">Andamento & Coach IA</h3>
-            <canvas id="progressChart" height="200" class="w-full"></canvas>
+        <!-- SEZIONE 2: SCHEDA ALLENAMENTO IN CORSO -->
+        <div id="tab-workout" class="tab-pane space-y-4">
+            <h2 class="text-xl font-bold text-white mb-4">Sessione Attuale</h2>
             
-            <div class="mt-5 p-4 bg-indigo-900/20 border border-indigo-500/30 rounded-xl text-sm text-indigo-100 leading-relaxed">
-                <strong class="text-indigo-400 block mb-1">FitCoach Gemini dice:</strong> 
-                "Ottimo lavoro oggi. Hai accumulato un alto volume in palestra. Dato il dispendio calorico aggiuntivo del calcio (720 Kcal), assicurati di reidratarti abbondantemente e aumentare i carboidrati a cena per favorire il recupero muscolare in vista di domani."
+            <!-- Timer Recupero (Fisso in alto) -->
+            <div class="bg-blue-900/30 p-4 rounded-2xl border border-blue-500/50 flex justify-between items-center sticky top-20 z-40 backdrop-blur-md shadow-lg">
+                <div>
+                    <span class="text-xs text-blue-400 font-bold uppercase tracking-wider block">Recupero</span>
+                    <span id="timerDisplay" class="text-2xl font-mono font-bold text-white">00:00</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="startTimer(60)" class="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm font-semibold border border-gray-600 active:bg-gray-700">+60s</button>
+                    <button onclick="startTimer(90)" class="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm font-semibold border border-gray-600 active:bg-gray-700">+90s</button>
+                </div>
             </div>
-        </section>
+
+            <!-- Esercizio 1 -->
+            <div class="bg-gray-800 p-4 rounded-2xl border border-gray-700 mt-4 shadow-md">
+                <div class="flex justify-between items-end mb-4">
+                    <div>
+                        <h3 class="font-bold text-lg text-white">Panca Piana</h3>
+                        <span class="text-sm text-gray-400">4 Serie x 8 Ripetizioni</span>
+                    </div>
+                    <span class="bg-gray-700 text-xs px-2 py-1 rounded-md text-gray-300">Prec: 70kg</span>
+                </div>
+                
+                <div class="space-y-3">
+                    <!-- Serie 1 -->
+                    <div class="flex items-center gap-2 bg-gray-900 p-2 rounded-xl border border-gray-700">
+                        <span class="font-bold text-gray-500 w-6 text-center">1</span>
+                        <input type="number" value="70" class="w-16 bg-gray-700 text-white rounded-lg p-2 text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <span class="text-gray-400 text-sm">kg</span>
+                        <input type="number" value="8" class="w-14 bg-gray-700 text-white rounded-lg p-2 text-center text-sm ml-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <span class="text-gray-400 text-sm">reps</span>
+                        <button onclick="toggleSet(this, 90)" class="ml-auto w-10 h-10 rounded-lg bg-gray-700 text-white font-bold transition-colors flex items-center justify-center"></button>
+                    </div>
+                    <!-- Serie 2 -->
+                    <div class="flex items-center gap-2 bg-gray-900 p-2 rounded-xl border border-gray-700">
+                        <span class="font-bold text-gray-500 w-6 text-center">2</span>
+                        <input type="number" value="70" class="w-16 bg-gray-700 text-white rounded-lg p-2 text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <span class="text-gray-400 text-sm">kg</span>
+                        <input type="number" value="8" class="w-14 bg-gray-700 text-white rounded-lg p-2 text-center text-sm ml-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <span class="text-gray-400 text-sm">reps</span>
+                        <button onclick="toggleSet(this, 90)" class="ml-auto w-10 h-10 rounded-lg bg-gray-700 text-white font-bold transition-colors flex items-center justify-center"></button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="w-full mt-6 bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg border border-blue-500 text-lg">Termina Allenamento</button>
+        </div>
     </main>
 
+    <!-- Barra di Navigazione Inferiore -->
+    <nav class="fixed bottom-0 w-full bg-gray-900 border-t border-gray-800 pb-safe shadow-2xl z-50">
+        <div class="flex justify-around items-center p-2">
+            <button onclick="switchTab('tab-timeline')" id="nav-tab-timeline" class="text-blue-500 flex flex-col items-center p-2 w-20 transition-colors">
+                <i class="fa-solid fa-house text-xl mb-1"></i>
+                <span class="text-[10px] font-semibold">Timeline</span>
+            </button>
+            <button onclick="switchTab('tab-workout')" id="nav-tab-workout" class="text-gray-500 flex flex-col items-center p-2 w-20 transition-colors">
+                <i class="fa-solid fa-dumbbell text-xl mb-1"></i>
+                <span class="text-[10px] font-semibold">Palestra</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Logica Funzionale dell'App -->
     <script>
-        // Funzione per simulare lo "Smart Merge" degli allenamenti cardio e pesi
-        function syncStrava() {
-            const resultDiv = document.getElementById('syncResult');
-            const gymStats = document.getElementById('gymStats');
-            const sportStats = document.getElementById('sportStats');
+        // Navigazione tra le schede
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
             
-            resultDiv.classList.remove('hidden');
-            resultDiv.innerHTML = '<span class="text-blue-400 animate-pulse">Ricerca allenamenti su Strava/Xiaomi in corso...</span>';
+            document.getElementById('nav-tab-timeline').className = 'text-gray-500 flex flex-col items-center p-2 w-20 transition-colors';
+            document.getElementById('nav-tab-workout').className = 'text-gray-500 flex flex-col items-center p-2 w-20 transition-colors';
             
-            setTimeout(() => {
-                resultDiv.innerHTML = `
-                    <strong class="text-white">Trovate 2 attività sovrapposte:</strong><br><br>
-                    <div class="space-y-2">
-                        <p>1. <span class="text-gray-400">Pesi (15:35-16:50)</span><br>→ <span class="text-green-400">Fuso con Scheda Palestra ✓</span></p>
-                        <p>2. <span class="text-gray-400">Corsa (18:05-19:28)</span><br>→ <span class="text-green-400">Fuso con Partita Calcio ✓</span></p>
-                    </div>
-                `;
-                gymStats.classList.remove('hidden');
-                sportStats.classList.remove('hidden');
-            }, 1800);
+            document.getElementById('nav-' + tabId).classList.replace('text-gray-500', 'text-blue-500');
         }
 
-        // Inizializzazione Grafico delle Prestazioni
-        const ctx = document.getElementById('progressChart').getContext('2d');
+        // Spunta serie e avvia timer
+        function toggleSet(btn, restTime) {
+            const isDone = btn.classList.contains('bg-blue-600');
+            if(isDone) {
+                btn.classList.replace('bg-blue-600', 'bg-gray-700');
+                btn.innerHTML = '';
+            } else {
+                btn.classList.replace('bg-gray-700', 'bg-blue-600');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                startTimer(restTime); // Avvia il recupero automatico
+            }
+        }
+
+        // Timer di Recupero con Avviso Acustico (Web Audio API)
+        let timerInterval;
+        let audioCtx;
+        function playBeep() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = 800; // Frequenza del beep
+            gain.gain.setValueAtTime(1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.8);
+            if(navigator.vibrate) navigator.vibrate([200, 100, 200]); // Vibrazione se supportata
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            let timeLeft = seconds;
+            const display = document.getElementById('timerDisplay');
+            
+            // Effetto visivo timer attivo
+            display.parentElement.parentElement.classList.add('ring-2', 'ring-blue-400');
+            
+            timerInterval = setInterval(() => {
+                let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+                let s = (timeLeft % 60).toString().padStart(2, '0');
+                display.innerText = `${m}:${s}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    playBeep(); // Suona quando scade!
+                    display.parentElement.parentElement.classList.remove('ring-2', 'ring-blue-400');
+                    display.innerText = "00:00";
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        // Animazione e simulazione Fusione Dati (Smart Merge Strava)
+        function simulateSync() {
+            const btn = document.getElementById('syncBtn');
+            const log = document.getElementById('syncLog');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sync...';
+            log.classList.remove('hidden');
+            log.innerHTML = 'Connessione a Strava e Xiaomi in corso...';
+
+            setTimeout(() => {
+                log.innerHTML = '<span class="text-green-400 font-bold">✓ Trovati 2 allenamenti. Fusione completata.</span>';
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Fatto';
+                btn.classList.replace('bg-orange-600', 'bg-green-600');
+                
+                // Inietta dati nei blocchi della timeline
+                const gymStats = document.getElementById('timelineGymStats');
+                gymStats.classList.remove('hidden');
+                gymStats.innerHTML = '<i class="fa-solid fa-heart-pulse"></i> <b>Smart Merge:</b> 138 BPM medi, 450 Kcal (Orologio)';
+                
+                const cardioStats = document.getElementById('timelineCardioStats');
+                cardioStats.classList.remove('hidden');
+                cardioStats.innerHTML = '<i class="fa-solid fa-person-running"></i> <b>Strava:</b> Corsa 6.5 km • 165 BPM max • 620 Kcal';
+            }, 2500);
+        }
+
+        // Inizializza Grafico Chart.js
+        const ctx = document.getElementById('chartCanvas').getContext('2d');
         new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'],
                 datasets: [{
-                    label: 'Volume Totale (Kg)',
-                    data: [4500, 4800, 4200, 5100, 4900, 5500],
-                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    label: 'Volume (kg)',
+                    data: [3200, 4100, 0, 4500, 2800, 5200],
+                    backgroundColor: '#3b82f6',
                     borderRadius: 4
                 }]
             },
-            options: { 
-                responsive: true, 
-                plugins: { 
-                    legend: { display: false } 
-                },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
                 scales: {
-                    y: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#9ca3af' } },
-                    x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    x: { grid: { display: false }, ticks: { color: '#9ca3af' } },
+                    y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }
                 }
             }
         });
